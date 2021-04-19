@@ -2,84 +2,101 @@ package com.iwanghang.viewpager2;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.os.Bundle;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.view.WindowManager;
+import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * https://blog.csdn.net/HouXinLin_CSDN/article/details/104440001
- */
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String TAG = "byWh";
+    public static Activity mActivity = null;
 
-    String[] url ={
-            "https://pic1.zhimg.com/80/v2-d90f73dc5a5cd06756ea820b1380aabd_hd.jpg",
-            "https://c-ssl.duitang.com/uploads/item/201505/09/20150509171654_dGsCB.jpeg",
-            "https://c-ssl.duitang.com/uploads/item/201509/17/20150917153109_svQch.jpeg"
-    };
+    // 创建一些视图View，用于放置到我们的ViewPager容器中
+    private List<View> views;
+    private ViewPager2 mViewPager2_01;
+    // 因为viewpager的使用要街注意一个适配器，所以要创建一个适配器的对象
+    private EcgResultAdapter mEcgResultAdapter;
+    private Page01Adapter mPage01Adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        // 屏幕常亮
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        mActivity = this;
+        initResultViews();
+    }
 
-        ViewPager2 viewPager2 = (ViewPager2) findViewById(R.id.viewpager2);
-
-        viewPager2.setAdapter(new RecyclerView.Adapter<ViewPagerViewHolder>() {
-            @NonNull
+    private void initResultViews() {
+        views = new ArrayList<>();
+        LayoutInflater inflater = LayoutInflater.from(this);
+        // 向ViewPager中添加view
+        views.add(inflater.inflate(R.layout.pp_01_01, null));
+        views.add(inflater.inflate(R.layout.pp_01_02, null));
+        views.add(inflater.inflate(R.layout.pp_01_03, null));
+        // 创建ViewPager以及添加适配器
+        mViewPager2_01 = findViewById(R.id.viewpager2);
+        mPage01Adapter = new Page01Adapter(views, this, callBack_01);
+        mViewPager2_01.setAdapter(mPage01Adapter);
+        // 为ViewPager2 注册监听事件
+        mViewPager2_01.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
-            public ViewPagerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                View inflate = LayoutInflater.from(getApplicationContext()).inflate(R.layout.item_view_page_2, parent,false);
-                return new ViewPagerViewHolder(inflate);
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                super.onPageScrolled(position, positionOffset, positionOffsetPixels);
+                doWhLog( "registerOnPageChangeCallback - onPageScrolled - position - " + position);
+                if (position == 0) {
+                    TextView text_pp_01_01 = findViewById(R.id.text_pp_01_01);
+                    text_pp_01_01.setText("11111111");
+                } else if (position == 1) {
+                    TextView text_pp_01_02 = findViewById(R.id.text_pp_01_02);
+                    text_pp_01_02.setText("222222222");
+                } else if (position == 2) {
+                    TextView text_pp_01_03 = findViewById(R.id.text_pp_01_03);
+                    text_pp_01_03.setText("333333333");
+                }
             }
-
             @Override
-            public void onBindViewHolder(@NonNull ViewPagerViewHolder holder, int position) {
-                getBitmapFromUrl(holder.mImageView,url[position]);
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                doWhLog( "registerOnPageChangeCallback - onPageSelected - position - " + position);
             }
-
             @Override
-            public int getItemCount() {
-                return url.length;
+            public void onPageScrollStateChanged(int state) {
+                super.onPageScrollStateChanged(state);
+                doWhLog( "registerOnPageChangeCallback - onPageScrollStateChanged - state - " + state);
             }
         });
     }
 
-    //加载图片
-    private void  getBitmapFromUrl(ImageView imageView,String str){
-        new Thread(() -> {
-            try {
-                URL url =new URL(str);
-                Bitmap bitmap = BitmapFactory.decodeStream(url.openStream());
-                imageView.post(() -> imageView.setImageBitmap(bitmap));
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
+    private Page01Adapter.CallBack callBack_01 = new Page01Adapter.CallBack() {
+        @Override
+        public void onClick(int position) {
+            doWhLog( "Page01Adapter - onClick - " + position);
+            switch (position) {
+                case 0:
+                    break;
+                case 1:
+                    break;
+                case 2:
+                    break;
+
             }
-        }).start();
-    }
-    class ViewPagerViewHolder extends RecyclerView.ViewHolder{
-        public ImageView mImageView;
-        public ViewPagerViewHolder(@NonNull View itemView) {
-            super(itemView);
-            mImageView=itemView.findViewById(R.id.imageview);
         }
+    };
+
+    public static void doWhLog(String logInfo) {
+        Log.d(TAG, logInfo);
     }
 
 }
